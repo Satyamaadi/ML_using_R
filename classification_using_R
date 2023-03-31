@@ -1,0 +1,78 @@
+sms_data <- read.csv('https://raw.githubusercontent.com/PacktPublishing/Machine-Learning-with-R-Third-Edition/master/Chapter04/sms_spam.csv')
+sms_data
+str(sms_data)
+sms_data$type <- factor(sms_data$type)
+table(sms_data)
+table(sms_data$type)
+library(tm)
+install.packages('tm')
+library(tm)
+smscorpus <- VCorpus(VectorSource(sms_data$text))
+smscorpus
+print(smscorpus)
+inspect(smscorpus[2:3])
+as.character(smscorpus[1])
+as.character(smscorpus[[1]])
+lapply(smscorpus[1:2],as.character)
+sms_clean <- tm_map(smscorpus,content_transformer(tolower))
+sms_clean
+sms_clean <- tm_map(sms_clean,removeNumbers)
+sms_clean <- tm_map(sms_clean,removeWords,stopwords())
+sms_clean <- tm_map(sms_clean,removePunctuation)
+library(SnowBallC)
+library(SnowballC)
+install.packages(SnowballC)
+install.packages('SnowballC')
+library(SnowballC)
+wordStem(c('running','hugging'))
+sms_clean <- tm_map(sms_clean,stemDocument)
+sms_clean <- tm_map(sms_clean,stripWhitespace)
+lapply(sms_clean,as.character)
+sms_dtm <- DocumentTermMatrix(sms_clean)
+sms_dtm
+sms_dtm_train <- sms_dtm[1:4169, ]
+sms_dtm_test  <- sms_dtm[4170:5559, ]
+sms_train_labels <- sms_raw[1:4169, ]$type
+sms_train_labels <- sms_data[1:4169, ]$type
+sms_test_labels <- sms_data[4170:5559, ]$type
+prop.table(table(sms_train_labels))
+prop.table(table(sms_test_labels))
+library(wordcloud)
+install.packages('wordcloud')
+library(wordcloud)
+wordcloud(sms_clean,min.freq = 50,random.order = FALSE)
+spam <- subset(sms_raw, type == "spam")
+spam <- subset(sms_data, type == "spam")
+ham  <- subset(sms_data, type == "ham")
+wordcloud(spam$text, max.words = 40, scale = c(3, 0.5))
+wordcloud(ham$text, max.words = 40, scale = c(3, 0.5))
+indFreqTerms(sms_dtm_train, 5)
+FindFreqTerms(sms_dtm_train, 5)
+findFreqTerms(sms_dtm_train, 5)
+sms_freq_words <- findFreqTerms(sms_dtm_train, 5)
+str(sms_freq_words)
+sms_dtm_freq_train <- sms_dtm_train[ , sms_freq_words]
+sms_dtm_freq_test <- sms_dtm_test[ , sms_freq_words]
+# convert counts to a factor
+convert_counts <- function(x) {
+x <- ifelse(x > 0, "Yes", "No")
+}
+sms_train <- apply(sms_dtm_freq_train, MARGIN = 2, convert_counts)
+sms_test  <- apply(sms_dtm_freq_test, MARGIN = 2, convert_counts)
+library(e1071)
+install.packages('e1071')
+library(e1071)
+sms_classifier <- naiveBayes(sms_train, sms_train_labels)
+sms_test_pred <- predict(sms_classifier, sms_test)
+library(gmodels)
+install.packages('gmodels')
+library(gmodels)
+CrossTable(sms_test_pred, sms_test_labels,
+prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE,
+dnn = c('predicted', 'actual'))
+sms_classifier2 <- naiveBayes(sms_train, sms_train_labels, laplace = 1)
+sms_test_pred2 <- predict(sms_classifier2, sms_test)
+CrossTable(sms_test_pred2, sms_test_labels,
+prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE,
+dnn = c('predicted', 'actual'))
+savehistory("/cloud/project/classification.txt")
