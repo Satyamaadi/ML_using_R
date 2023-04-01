@@ -1,0 +1,567 @@
+> #entropy
+> -0.60 * log2(0.60) - 0.40 * log2(0.40)
+[1] 0.9709506
+> curve(-x * log2(x) - (1 - x) * log2(1 - x),
++       col = "red", xlab = "x", ylab = "Entropy", lwd = 4)
+> 
+> bank_data <- read.csv('https://raw.githubusercontent.com/PacktPublishing/Machine-Learning-with-R-Third-Edition/master/Chapter05/credit.csv')
+> bank_data <- read.csv('https://raw.githubusercontent.com/PacktPublishing/Machine-Learning-with-R-Third-Edition/master/Chapter05/credit.csv',stringAsFactor = TRUE)
+Error in read.table(file = file, header = header, sep = sep, quote = quote,  : 
+  unused argument (stringAsFactor = TRUE)
+> bank_data <- read.csv('https://raw.githubusercontent.com/PacktPublishing/Machine-Learning-with-R-Third-Edition/master/Chapter05/credit.csv',stringAsFactors = TRUE)
+Error in read.table(file = file, header = header, sep = sep, quote = quote,  : 
+  unused argument (stringAsFactors = TRUE)
+> str(bank_data)
+'data.frame':	1000 obs. of  17 variables:
+ $ checking_balance    : chr  "< 0 DM" "1 - 200 DM" "unknown" "< 0 DM" ...
+ $ months_loan_duration: int  6 48 12 42 24 36 24 36 12 30 ...
+ $ credit_history      : chr  "critical" "good" "critical" "good" ...
+ $ purpose             : chr  "furniture/appliances" "furniture/appliances" "education" "furniture/appliances" ...
+ $ amount              : int  1169 5951 2096 7882 4870 9055 2835 6948 3059 5234 ...
+ $ savings_balance     : chr  "unknown" "< 100 DM" "< 100 DM" "< 100 DM" ...
+ $ employment_duration : chr  "> 7 years" "1 - 4 years" "4 - 7 years" "4 - 7 years" ...
+ $ percent_of_income   : int  4 2 2 2 3 2 3 2 2 4 ...
+ $ years_at_residence  : int  4 2 3 4 4 4 4 2 4 2 ...
+ $ age                 : int  67 22 49 45 53 35 53 35 61 28 ...
+ $ other_credit        : chr  "none" "none" "none" "none" ...
+ $ housing             : chr  "own" "own" "own" "other" ...
+ $ existing_loans_count: int  2 1 1 1 2 1 1 1 1 2 ...
+ $ job                 : chr  "skilled" "skilled" "unskilled" "skilled" ...
+ $ dependents          : int  1 1 2 2 2 2 1 1 1 1 ...
+ $ phone               : chr  "yes" "no" "no" "no" ...
+ $ default             : chr  "no" "yes" "no" "no" ...
+> table(bank_data$checking_balance)
+
+    < 0 DM   > 200 DM 1 - 200 DM    unknown 
+       274         63        269        394 
+> table(bank_data$savings_balance)
+
+     < 100 DM     > 1000 DM  100 - 500 DM 500 - 1000 DM       unknown 
+          603            48           103            63           183 
+> summary(bank_data$months_loan_duration)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    4.0    12.0    18.0    20.9    24.0    72.0 
+> summary(bank_data$amount)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    250    1366    2320    3271    3972   18424 
+> table(bank_data$def)
+
+ no yes 
+700 300 
+> table(bank_data$default)
+
+ no yes 
+700 300 
+> RNGversion('3.5.1')
+Warning message:
+In RNGkind("Mersenne-Twister", "Inversion", "Rounding") :
+  non-uniform 'Rounding' sampler used
+> set.seed(345)
+> train_sample <- sample(1000,900)
+> str(train_sample)
+ int [1:900] 217 275 390 654 435 800 384 828 470 93 ...
+> bank_data_train <- bank_data[train_sample,]
+> bank_data_test <- bank_data[-train_sample,]
+> prop.table(table(credit_train$default))
+Error in table(credit_train$default) : object 'credit_train' not found
+> prop.table(table(bank_data_train$default))
+
+       no       yes 
+0.7033333 0.2966667 
+> prop.table(table(bank_data_test$default))
+
+  no  yes 
+0.67 0.33 
+> 
+> library(C50)
+Error in library(C50) : there is no package called ‘C50’
+> install.packages('C50')
+Installing package into ‘/cloud/lib/x86_64-pc-linux-gnu-library/4.2’
+(as ‘lib’ is unspecified)
+also installing the dependencies ‘cli’, ‘glue’, ‘lifecycle’, ‘magrittr’, ‘rlang’, ‘stringi’, ‘vctrs’, ‘plyr’, ‘stringr’, ‘reshape2’, ‘libcoin’, ‘mvtnorm’, ‘Formula’, ‘inum’, ‘Cubist’, ‘partykit’
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/cli_3.6.1.tar.gz'
+Content type 'application/x-gzip' length 1258696 bytes (1.2 MB)
+==================================================
+downloaded 1.2 MB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/glue_1.6.2.tar.gz'
+Content type 'application/x-gzip' length 157185 bytes (153 KB)
+==================================================
+downloaded 153 KB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/lifecycle_1.0.3.tar.gz'
+Content type 'application/x-gzip' length 122567 bytes (119 KB)
+==================================================
+downloaded 119 KB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/magrittr_2.0.3.tar.gz'
+Content type 'application/x-gzip' length 234989 bytes (229 KB)
+==================================================
+downloaded 229 KB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/rlang_1.1.0.tar.gz'
+Content type 'application/x-gzip' length 1522704 bytes (1.5 MB)
+==================================================
+downloaded 1.5 MB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/stringi_1.7.12.tar.gz'
+Content type 'application/x-gzip' length 3191490 bytes (3.0 MB)
+==================================================
+downloaded 3.0 MB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/vctrs_0.6.1.tar.gz'
+Content type 'application/x-gzip' length 1279047 bytes (1.2 MB)
+==================================================
+downloaded 1.2 MB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/plyr_1.8.8.tar.gz'
+Content type 'application/x-gzip' length 817977 bytes (798 KB)
+==================================================
+downloaded 798 KB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/stringr_1.5.0.tar.gz'
+Content type 'application/x-gzip' length 301376 bytes (294 KB)
+==================================================
+downloaded 294 KB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/reshape2_1.4.4.tar.gz'
+Content type 'application/x-gzip' length 116930 bytes (114 KB)
+==================================================
+downloaded 114 KB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/libcoin_1.0-9.tar.gz'
+Content type 'application/x-gzip' length 1054338 bytes (1.0 MB)
+==================================================
+downloaded 1.0 MB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/mvtnorm_1.1-3.tar.gz'
+Content type 'application/x-gzip' length 264984 bytes (258 KB)
+==================================================
+downloaded 258 KB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/Formula_1.2-5.tar.gz'
+Content type 'application/x-gzip' length 158349 bytes (154 KB)
+==================================================
+downloaded 154 KB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/inum_1.0-5.tar.gz'
+Content type 'application/x-gzip' length 36628 bytes (35 KB)
+==================================================
+downloaded 35 KB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/Cubist_0.4.2.1.tar.gz'
+Content type 'application/x-gzip' length 883771 bytes (863 KB)
+==================================================
+downloaded 863 KB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/partykit_1.2-19.tar.gz'
+Content type 'application/x-gzip' length 2414574 bytes (2.3 MB)
+==================================================
+downloaded 2.3 MB
+
+trying URL 'http://rspm/default/__linux__/focal/latest/src/contrib/C50_0.1.8.tar.gz'
+Content type 'application/x-gzip' length 334494 bytes (326 KB)
+==================================================
+downloaded 326 KB
+
+* installing *binary* package ‘cli’ ...
+* DONE (cli)
+* installing *binary* package ‘glue’ ...
+* DONE (glue)
+* installing *binary* package ‘magrittr’ ...
+* DONE (magrittr)
+* installing *binary* package ‘rlang’ ...
+* DONE (rlang)
+* installing *binary* package ‘stringi’ ...
+* DONE (stringi)
+* installing *binary* package ‘plyr’ ...
+* DONE (plyr)
+* installing *binary* package ‘mvtnorm’ ...
+* DONE (mvtnorm)
+* installing *binary* package ‘Formula’ ...
+* DONE (Formula)
+* installing *binary* package ‘lifecycle’ ...
+* DONE (lifecycle)
+* installing *binary* package ‘libcoin’ ...
+* DONE (libcoin)
+* installing *binary* package ‘vctrs’ ...
+* DONE (vctrs)
+* installing *binary* package ‘inum’ ...
+* DONE (inum)
+* installing *binary* package ‘stringr’ ...
+* DONE (stringr)
+* installing *binary* package ‘partykit’ ...
+* DONE (partykit)
+* installing *binary* package ‘reshape2’ ...
+* DONE (reshape2)
+* installing *binary* package ‘Cubist’ ...
+* DONE (Cubist)
+* installing *binary* package ‘C50’ ...
+* DONE (C50)
+
+The downloaded source packages are in
+	‘/tmp/RtmpAmeHqn/downloaded_packages’
+> library(C50)
+> model <- C5.0(bank_data_train[-17], bank_data_train$default)
+Error: C5.0 models require a factor outcome
+> model <- C5.0(bank_data_train[-17], bank_data_train$default)
+Error: C5.0 models require a factor outcome
+> model <- C5.0(bank_data_train[-17], bank_data_train$default)
+Error: C5.0 models require a factor outcome
+> bank_data_train <- as.factor(bank_data[train_sample,])
+Warning message:
+In xtfrm.data.frame(x) : cannot xtfrm data frames
+> bank_data_train$default <- as.factor(bank_data_train$default)
+Error in bank_data_train$default : 
+  $ operator is invalid for atomic vectors
+> bank_data_train$default
+Error in bank_data_train$default : 
+  $ operator is invalid for atomic vectors
+> bank_data_train <- bank_data[train_sample,]
+> str(bank_data_train)
+'data.frame':	900 obs. of  17 variables:
+ $ checking_balance    : chr  "< 0 DM" "< 0 DM" "unknown" "1 - 200 DM" ...
+ $ months_loan_duration: int  18 30 9 36 9 9 12 18 24 12 ...
+ $ credit_history      : chr  "perfect" "good" "good" "poor" ...
+ $ purpose             : chr  "business" "renovations" "business" "car" ...
+ $ amount              : int  3104 11998 1449 8086 2136 1549 1330 4165 4679 797 ...
+ $ savings_balance     : chr  "< 100 DM" "< 100 DM" "< 100 DM" "100 - 500 DM" ...
+ $ employment_duration : chr  "4 - 7 years" "< 1 year" "4 - 7 years" "> 7 years" ...
+ $ percent_of_income   : int  3 1 3 2 3 4 4 2 3 4 ...
+ $ years_at_residence  : int  1 1 2 4 2 2 1 2 3 3 ...
+ $ age                 : int  31 34 27 42 25 35 26 36 35 33 ...
+ $ other_credit        : chr  "bank" "none" "none" "none" ...
+ $ housing             : chr  "own" "own" "own" "own" ...
+ $ existing_loans_count: int  1 1 2 4 1 1 1 2 2 1 ...
+ $ job                 : chr  "skilled" "unskilled" "skilled" "management" ...
+ $ dependents          : int  1 1 1 1 1 1 1 2 1 2 ...
+ $ phone               : chr  "yes" "yes" "no" "yes" ...
+ $ default             : chr  "no" "yes" "no" "yes" ...
+> bank_data_train$default
+  [1] "no"  "yes" "no"  "yes" "no"  "no"  "no"  "yes" "no"  "yes" "no"  "yes" "yes" "no" 
+ [15] "no"  "no"  "yes" "yes" "no"  "no"  "yes" "yes" "no"  "no"  "no"  "no"  "no"  "no" 
+ [29] "no"  "yes" "no"  "no"  "no"  "yes" "no"  "no"  "no"  "no"  "yes" "no"  "no"  "no" 
+ [43] "no"  "no"  "yes" "yes" "no"  "yes" "no"  "no"  "no"  "yes" "no"  "yes" "no"  "yes"
+ [57] "yes" "no"  "no"  "no"  "no"  "no"  "yes" "no"  "no"  "no"  "no"  "yes" "no"  "no" 
+ [71] "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "yes" "no"  "no"  "no"  "no"  "no" 
+ [85] "no"  "yes" "no"  "no"  "no"  "no"  "no"  "no"  "yes" "no"  "no"  "yes" "yes" "no" 
+ [99] "no"  "no"  "yes" "no"  "no"  "yes" "yes" "no"  "no"  "yes" "yes" "no"  "yes" "no" 
+[113] "no"  "no"  "yes" "no"  "yes" "no"  "no"  "no"  "no"  "no"  "yes" "no"  "no"  "no" 
+[127] "no"  "yes" "no"  "no"  "no"  "no"  "no"  "no"  "yes" "yes" "no"  "no"  "no"  "no" 
+[141] "yes" "no"  "no"  "yes" "yes" "no"  "no"  "no"  "no"  "no"  "yes" "no"  "no"  "yes"
+[155] "no"  "no"  "no"  "no"  "no"  "no"  "yes" "no"  "no"  "yes" "yes" "no"  "no"  "yes"
+[169] "no"  "no"  "no"  "no"  "no"  "yes" "no"  "no"  "yes" "no"  "no"  "no"  "no"  "yes"
+[183] "yes" "no"  "yes" "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "yes"
+[197] "no"  "yes" "no"  "yes" "yes" "no"  "no"  "no"  "yes" "no"  "yes" "no"  "yes" "yes"
+[211] "yes" "no"  "yes" "no"  "no"  "no"  "no"  "no"  "no"  "yes" "no"  "no"  "no"  "no" 
+[225] "no"  "no"  "no"  "yes" "yes" "no"  "yes" "no"  "no"  "no"  "no"  "yes" "no"  "no" 
+[239] "yes" "yes" "yes" "yes" "no"  "no"  "no"  "yes" "yes" "no"  "no"  "yes" "no"  "no" 
+[253] "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "yes" "no"  "no"  "no"  "no"  "no" 
+[267] "yes" "yes" "no"  "yes" "no"  "no"  "no"  "no"  "no"  "yes" "yes" "no"  "no"  "no" 
+[281] "yes" "no"  "yes" "no"  "no"  "yes" "no"  "yes" "yes" "yes" "no"  "yes" "no"  "yes"
+[295] "no"  "yes" "no"  "no"  "no"  "no"  "yes" "no"  "no"  "no"  "no"  "no"  "no"  "no" 
+[309] "no"  "no"  "yes" "no"  "yes" "no"  "no"  "no"  "no"  "yes" "yes" "yes" "yes" "no" 
+[323] "no"  "no"  "no"  "no"  "yes" "no"  "no"  "yes" "no"  "yes" "no"  "no"  "no"  "yes"
+[337] "no"  "yes" "no"  "no"  "no"  "yes" "no"  "no"  "no"  "no"  "no"  "no"  "yes" "yes"
+[351] "yes" "yes" "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no" 
+[365] "no"  "no"  "no"  "no"  "yes" "no"  "yes" "no"  "no"  "no"  "no"  "yes" "yes" "no" 
+[379] "no"  "yes" "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "yes" "no"  "yes" "no" 
+[393] "no"  "no"  "yes" "yes" "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no" 
+[407] "yes" "yes" "no"  "no"  "no"  "yes" "no"  "yes" "yes" "no"  "no"  "yes" "yes" "yes"
+[421] "no"  "no"  "yes" "no"  "no"  "no"  "no"  "yes" "no"  "no"  "no"  "no"  "no"  "no" 
+[435] "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "yes" "yes" "no"  "no"  "yes"
+[449] "no"  "no"  "no"  "no"  "no"  "yes" "no"  "yes" "no"  "no"  "yes" "yes" "no"  "no" 
+[463] "yes" "no"  "yes" "no"  "no"  "yes" "no"  "no"  "no"  "no"  "yes" "yes" "no"  "no" 
+[477] "yes" "no"  "no"  "yes" "no"  "no"  "yes" "yes" "yes" "yes" "yes" "no"  "no"  "yes"
+[491] "no"  "yes" "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "yes"
+[505] "no"  "no"  "no"  "no"  "yes" "no"  "yes" "no"  "no"  "yes" "no"  "no"  "yes" "yes"
+[519] "no"  "no"  "no"  "no"  "no"  "yes" "yes" "no"  "no"  "no"  "no"  "no"  "no"  "yes"
+[533] "no"  "yes" "no"  "no"  "yes" "no"  "no"  "no"  "no"  "no"  "no"  "yes" "no"  "yes"
+[547] "no"  "yes" "yes" "no"  "no"  "no"  "yes" "no"  "no"  "no"  "yes" "no"  "yes" "no" 
+[561] "no"  "no"  "no"  "yes" "no"  "no"  "yes" "no"  "no"  "no"  "no"  "yes" "no"  "no" 
+[575] "yes" "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no" 
+[589] "no"  "no"  "no"  "no"  "yes" "no"  "no"  "no"  "no"  "no"  "yes" "yes" "yes" "no" 
+[603] "no"  "no"  "no"  "no"  "yes" "no"  "no"  "no"  "no"  "yes" "yes" "no"  "no"  "no" 
+[617] "yes" "no"  "yes" "no"  "no"  "no"  "no"  "no"  "no"  "yes" "no"  "yes" "no"  "no" 
+[631] "yes" "no"  "no"  "no"  "yes" "yes" "no"  "yes" "yes" "no"  "yes" "no"  "yes" "no" 
+[645] "no"  "no"  "no"  "no"  "yes" "yes" "no"  "no"  "no"  "no"  "yes" "no"  "no"  "no" 
+[659] "no"  "no"  "no"  "yes" "yes" "no"  "yes" "yes" "no"  "yes" "no"  "no"  "no"  "no" 
+[673] "yes" "yes" "no"  "yes" "no"  "yes" "yes" "no"  "no"  "no"  "no"  "no"  "yes" "no" 
+[687] "yes" "yes" "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "yes" "no"  "no"  "no" 
+[701] "no"  "no"  "no"  "no"  "no"  "no"  "no"  "yes" "no"  "no"  "yes" "yes" "no"  "yes"
+[715] "no"  "yes" "no"  "no"  "yes" "no"  "no"  "no"  "no"  "no"  "yes" "no"  "no"  "no" 
+[729] "yes" "yes" "no"  "yes" "yes" "no"  "no"  "yes" "no"  "no"  "yes" "no"  "yes" "no" 
+[743] "no"  "no"  "no"  "no"  "no"  "no"  "yes" "yes" "no"  "no"  "no"  "no"  "no"  "no" 
+[757] "no"  "yes" "no"  "no"  "no"  "yes" "no"  "no"  "yes" "yes" "no"  "no"  "no"  "yes"
+[771] "no"  "yes" "no"  "yes" "no"  "no"  "no"  "no"  "no"  "no"  "yes" "yes" "yes" "no" 
+[785] "no"  "no"  "no"  "yes" "yes" "no"  "no"  "no"  "no"  "no"  "no"  "yes" "no"  "yes"
+[799] "no"  "yes" "yes" "yes" "no"  "no"  "no"  "no"  "yes" "no"  "no"  "no"  "yes" "yes"
+[813] "yes" "yes" "no"  "no"  "no"  "yes" "no"  "no"  "yes" "yes" "no"  "no"  "yes" "yes"
+[827] "yes" "no"  "yes" "yes" "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "yes"
+[841] "no"  "yes" "yes" "no"  "yes" "yes" "no"  "no"  "yes" "no"  "no"  "yes" "no"  "no" 
+[855] "no"  "no"  "no"  "yes" "yes" "no"  "no"  "yes" "no"  "no"  "yes" "no"  "no"  "yes"
+[869] "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "no"  "yes" "no"  "yes" "no" 
+[883] "no"  "no"  "no"  "yes" "no"  "no"  "no"  "no"  "no"  "yes" "no"  "yes" "no"  "no" 
+[897] "no"  "no"  "no"  "no" 
+> bank_data_train$default <- as.factor(bank_data_train$default)
+> model <- C5.0(bank_data_train[-17], bank_data_train$default)
+> model
+
+Call:
+C5.0.default(x = bank_data_train[-17], y = bank_data_train$default)
+
+Classification Tree
+Number of samples: 900 
+Number of predictors: 16 
+
+Tree size: 49 
+
+Non-standard options: attempt to group attributes
+
+> summary(model)
+
+Call:
+C5.0.default(x = bank_data_train[-17], y = bank_data_train$default)
+
+
+C5.0 [Release 2.07 GPL Edition]  	Sat Apr  1 12:33:05 2023
+-------------------------------
+
+Class specified by attribute `outcome'
+
+Read 900 cases (17 attributes) from undefined.data
+
+Decision tree:
+
+checking_balance in {unknown,> 200 DM}: no (413/51)
+checking_balance in {< 0 DM,1 - 200 DM}:
+:...credit_history in {perfect,very good}:
+    :...housing in {other,rent}: yes (29/3)
+    :   housing = own:
+    :   :...purpose in {renovations,car,car0}: yes (12/2)
+    :       purpose = education: no (2)
+    :       purpose = furniture/appliances:
+    :       :...years_at_residence <= 1: yes (2)
+    :       :   years_at_residence > 1: no (10/3)
+    :       purpose = business:
+    :       :...phone = no: no (3)
+    :           phone = yes:
+    :           :...other_credit = bank: no (2)
+    :               other_credit in {none,store}: yes (3)
+    credit_history in {good,poor,critical}:
+    :...months_loan_duration <= 22:
+        :...credit_history = critical: no (67/10)
+        :   credit_history in {good,poor}:
+        :   :...checking_balance = 1 - 200 DM:
+        :       :...other_credit in {bank,none}: no (93/22)
+        :       :   other_credit = store: yes (2)
+        :       checking_balance = < 0 DM:
+        :       :...dependents > 1: no (11/2)
+        :           dependents <= 1:
+        :           :...savings_balance = 100 - 500 DM: yes (3)
+        :               savings_balance in {unknown,500 - 1000 DM,
+        :               :                   > 1000 DM}: no (11/2)
+        :               savings_balance = < 100 DM:
+        :               :...purpose = business: no (1)
+        :                   purpose in {renovations,car,education,
+        :                   :           car0}: yes (23/6)
+        :                   purpose = furniture/appliances:
+        :                   :...months_loan_duration <= 16: no (22/4)
+        :                       months_loan_duration > 16: [S1]
+        months_loan_duration > 22:
+        :...amount <= 1381: yes (11)
+            amount > 1381:
+            :...savings_balance = 500 - 1000 DM: yes (4/1)
+                savings_balance = > 1000 DM: no (3/1)
+                savings_balance = 100 - 500 DM:
+                :...credit_history = good: yes (12/3)
+                :   credit_history in {poor,critical}: no (11/2)
+                savings_balance = unknown:
+                :...checking_balance = 1 - 200 DM: no (16/1)
+                :   checking_balance = < 0 DM:
+                :   :...credit_history = poor: yes (0)
+                :       credit_history = critical: no (1)
+                :       credit_history = good:
+                :       :...months_loan_duration <= 27: no (4/1)
+                :           months_loan_duration > 27: yes (4)
+                savings_balance = < 100 DM:
+                :...months_loan_duration > 47: yes (19/2)
+                    months_loan_duration <= 47:
+                    :...age > 57: no (6)
+                        age <= 57:
+                        :...purpose in {renovations,car0}: yes (5/1)
+                            purpose = business:
+                            :...phone = yes: yes (5/1)
+                            :   phone = no: no (2)
+                            purpose = education:
+                            :...checking_balance = < 0 DM: yes (3)
+                            :   checking_balance = 1 - 200 DM: no (2)
+                            purpose = furniture/appliances: [S2]
+                            purpose = car:
+                            :...percent_of_income > 3: yes (12)
+                                percent_of_income <= 3:
+                                :...age <= 29: yes (5)
+                                    age > 29:
+                                    :...amount <= 5179: yes (4/1)
+                                        amount > 5179: no (7)
+
+SubTree [S1]
+
+employment_duration in {4 - 7 years,< 1 year}: no (5)
+employment_duration in {> 7 years,1 - 4 years,unemployed}: yes (11)
+
+SubTree [S2]
+
+employment_duration = 4 - 7 years: yes (8/2)
+employment_duration = unemployed: no (2/1)
+employment_duration = < 1 year:
+:...years_at_residence <= 2: no (7/2)
+:   years_at_residence > 2: yes (5)
+employment_duration = > 7 years:
+:...amount <= 2613: no (5)
+:   amount > 2613: yes (3)
+employment_duration = 1 - 4 years:
+:...age <= 23: yes (2)
+    age > 23: no (7)
+
+
+Evaluation on training data (900 cases):
+
+	    Decision Tree   
+	  ----------------  
+	  Size      Errors  
+
+	    48  124(13.8%)   <<
+
+
+	   (a)   (b)    <-classified as
+	  ----  ----
+	   611    22    (a): class no
+	   102   165    (b): class yes
+
+
+	Attribute usage:
+
+	100.00%	checking_balance
+	 54.11%	credit_history
+	 47.11%	months_loan_duration
+	 26.67%	savings_balance
+	 20.00%	purpose
+	 19.44%	amount
+	 11.11%	other_credit
+	 10.00%	age
+	  9.67%	dependents
+	  7.00%	housing
+	  6.11%	employment_duration
+	  3.11%	percent_of_income
+	  2.67%	years_at_residence
+	  1.67%	phone
+
+
+Time: 0.0 secs
+
+> bank_data_pred <- predict(model,bank_data_test)
+> bank_data_pred
+  [1] no  no  no  no  no  no  no  no  no  no  no  no  no  no  no  no  no  no  yes no  no 
+ [22] yes no  yes no  no  no  no  yes no  no  no  no  no  no  no  no  no  yes no  yes no 
+ [43] no  yes no  no  yes no  no  no  yes no  no  no  no  no  no  no  no  no  no  no  no 
+ [64] no  no  no  yes no  no  no  no  yes no  no  no  yes no  no  yes no  no  no  no  no 
+ [85] no  no  no  no  yes no  yes no  no  no  yes no  no  yes yes no 
+Levels: no yes
+> # cross tabulation of predicted versus actual classes
+> library(gmodels)
+> CrossTable(credit_test$default, credit_pred,
++            prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE,
++            dnn = c('actual default', 'predicted default'))
+Error in CrossTable(credit_test$default, credit_pred, prop.chisq = FALSE,  : 
+  object 'credit_test' not found
+> # cross tabulation of predicted versus actual classes
+> library(gmodels)
+> CrossTable(bank_data_test$default, bank_data_pred,
++            prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE,
++            dnn = c('actual default', 'predicted default'))
+
+ 
+   Cell Contents
+|-------------------------|
+|                       N |
+|         N / Table Total |
+|-------------------------|
+
+ 
+Total Observations in Table:  100 
+
+ 
+               | predicted default 
+actual default |        no |       yes | Row Total | 
+---------------|-----------|-----------|-----------|
+            no |        57 |        10 |        67 | 
+               |     0.570 |     0.100 |           | 
+---------------|-----------|-----------|-----------|
+           yes |        25 |         8 |        33 | 
+               |     0.250 |     0.080 |           | 
+---------------|-----------|-----------|-----------|
+  Column Total |        82 |        18 |       100 | 
+---------------|-----------|-----------|-----------|
+
+ 
+> 
+> bank_data_boost10 <- C5.0(credit_train[-17], credit_train$default,
++                        trials = 10)
+Error in C5.0(credit_train[-17], credit_train$default, trials = 10) : 
+  object 'credit_train' not found
+> bank_data_boost10 <- C5.0(bank_data_train[-17], bank_data_train$default,
++                        trials = 10)
+> bank_data_boost10
+
+Call:
+C5.0.default(x = bank_data_train[-17], y = bank_data_train$default, trials = 10)
+
+Classification Tree
+Number of samples: 900 
+Number of predictors: 16 
+
+Number of boosting iterations: 10 
+Average tree size: 38.9 
+
+Non-standard options: attempt to group attributes
+
+> bank_data_boost10_pred <- predict(bank_data_boost10,bank_data_test)
+> bank_data_boost10_pred
+  [1] no  no  no  no  no  no  no  no  no  no  no  no  no  yes no  no  no  no  yes no  no 
+ [22] yes no  yes no  no  no  no  no  no  no  no  no  no  no  no  no  yes yes no  yes no 
+ [43] no  yes no  no  yes no  yes no  yes no  no  no  no  no  no  no  no  no  yes no  no 
+ [64] no  no  no  no  no  no  no  no  yes no  no  no  yes no  no  no  no  yes no  no  no 
+ [85] no  no  no  no  yes no  yes no  no  no  no  no  no  yes yes no 
+Levels: no yes
+> # cross tabulation of predicted versus actual classes
+> library(gmodels)
+> CrossTable(bank_data_test$default, bank_data_boost10_pred,
++            prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE,
++            dnn = c('actual default', 'predicted default'))
+
+ 
+   Cell Contents
+|-------------------------|
+|                       N |
+|         N / Table Total |
+|-------------------------|
+
+ 
+Total Observations in Table:  100 
+
+ 
+               | predicted default 
+actual default |        no |       yes | Row Total | 
+---------------|-----------|-----------|-----------|
+            no |        60 |         7 |        67 | 
+               |     0.600 |     0.070 |           | 
+---------------|-----------|-----------|-----------|
+           yes |        21 |        12 |        33 | 
+               |     0.210 |     0.120 |           | 
+---------------|-----------|-----------|-----------|
+  Column Total |        81 |        19 |       100 | 
+---------------|-----------|-----------|-----------|
+
+ 
